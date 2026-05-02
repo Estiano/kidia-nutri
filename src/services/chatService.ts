@@ -6,17 +6,18 @@ export interface ChatMessage {
 }
 
 export const sendMessageToAI = async (messages: ChatMessage[]): Promise<string> => {
-  const isDev = window.location.hostname.includes('googleusercontent.com') || 
+  const isDev = window.location.hostname === 'localhost' || 
+                window.location.hostname.includes('127.0.0.1') ||
+                window.location.hostname.includes('googleusercontent.com') || 
                 window.location.hostname.includes('run.app') ||
-                window.location.hostname === 'localhost' ||
                 window.location.hostname.includes('ais-') ||
                 window.location.hostname.includes('aisstudio');
 
-  if (isDev) {
+  // Helper para chamada local
+  const callLocalAI = async () => {
     const ai = getGeminiAI();
-    if (!ai) throw new Error("GEMINI_API_KEY não configurada.");
+    if (!ai) throw new Error("GEMINI_API_KEY não configurada no cliente.");
     
-    // System instruction to guide the AI as a nutrition assistant in Angola
     const systemPrompt = `Tu és o Kidia Nutri AI, um assistente virtual de nutrição especializado na saúde e culinária de Angola. 
     O teu objetivo é ajudar os angolanos a comerem de forma mais saudável.
     REGRAS DE RESPOSTA:
@@ -40,8 +41,18 @@ export const sendMessageToAI = async (messages: ChatMessage[]): Promise<string> 
     });
 
     return response.text;
-  } else {
-    // Production (Vercel)
+  };
+
+  if (isDev) {
+    try {
+      return await callLocalAI();
+    } catch (err) {
+      console.warn("Falha na IA local, tentando backend...", err);
+    }
+  }
+
+  // Produção (Vercel): Tenta o backend primeiro
+  try {
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -49,11 +60,15 @@ export const sendMessageToAI = async (messages: ChatMessage[]): Promise<string> 
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Erro na conversa');
+      // Se o backend falhar (ex: chave não configurada no Vercel), tenta local como fallback
+      console.warn("Backend falhou, tentando fallback local...");
+      return await callLocalAI();
     }
 
     const data = await response.json();
     return data.text;
+  } catch (error) {
+    console.error('Erro na conversa, tentando fallback local...', error);
+    return await callLocalAI();
   }
 };
