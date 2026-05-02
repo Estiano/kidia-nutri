@@ -1,0 +1,8 @@
+{
+  "name": "Kidia Nutri",
+  "description": "Seu guia nutricional pessoal por IA. Fotografe pratos e receba análises detalhadas.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
