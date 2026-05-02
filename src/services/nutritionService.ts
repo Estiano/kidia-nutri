@@ -9,9 +9,16 @@ export interface NutritionAnalysis {
   carbs: number;
   fat: number;
   fiber: number;
+  iron: number;
+  vit_c: number;
+  vit_a: number;
+  calcium: number;
   score: number;
   score_label: string;
   recommendation: string;
+  benefits: string[];
+  cautions: string[];
+  description: string;
 }
 
 export const analyzeImage = async (base64Image: string): Promise<NutritionAnalysis> => {
@@ -26,9 +33,25 @@ export const analyzeImage = async (base64Image: string): Promise<NutritionAnalys
     const ai = getGeminiAI();
     if (!ai) throw new Error("GEMINI_API_KEY não configurada no cliente.");
     
-    const prompt = `Analise esta imagem de uma refeição e forneça os detalhes nutricionais em formato JSON. 
-    Seja o mais preciso possível para um guia de saúde em Angola.
-    Retorne um objeto com os campos: item_name (texto), calories (número), protein (número em g), carbs (número em g), fat (número em g), fiber (número em g), score (0-100), score_label (ex: Saudável, Moderado, Atenção), recommendation (uma frase curta de conselho).`;
+    const prompt = `Analise esta imagem de uma refeição e forneça os detalhes nutricionais detalhados em formato JSON. 
+    Seja o mais preciso possível para um guia de saúde em Angola, focando especialmente em ferro para combate à anemia.
+    Retorne um objeto JSON com os seguintes campos exatos:
+    - item_name (texto)
+    - description (breve descrição do prato, 2 frases)
+    - calories (número)
+    - protein (número em g)
+    - carbs (número em g)
+    - fat (número em g)
+    - fiber (número em g)
+    - iron (número em mg)
+    - vit_c (número em mg)
+    - vit_a (número em mcg)
+    - calcium (número em mg)
+    - score (0-100)
+    - score_label (ex: Saudável, Moderado, Atenção)
+    - recommendation (uma frase curta de conselho)
+    - benefits (lista de strings com 2-3 benefícios principais)
+    - cautions (lista de strings com alertas se houver excesso de sal, gordura ou açúcar, ou se for contra-indicado para certas condições)`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
