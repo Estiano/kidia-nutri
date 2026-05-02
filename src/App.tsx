@@ -1,3 +1,5 @@
+import { useState, useEffect, FormEvent, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { db } from './lib/db';
 import { ProgressBar } from './components/ProgressBar';
 import { BottomNav } from './components/BottomNav';
