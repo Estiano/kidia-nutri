@@ -89,6 +89,12 @@ export const db = {
       }
       return mockDb.getScansToday(userId);
     },
+    getAll: async (userId: string) => {
+      if (supabase) {
+        return supabase.from('scan_history').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+      }
+      return { data: [], error: null };
+    },
     save: async (userId: string, scan: any) => {
       if (supabase) {
         return supabase.from('scan_history').insert([{ ...scan, user_id: userId }]);
