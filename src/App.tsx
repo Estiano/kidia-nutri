@@ -234,8 +234,8 @@ export default function App() {
       <AnimatePresence mode="wait">
         
         {screen === 'welcome' && (
-          <motion.div key="welcome" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-screen flex flex-col">
-            <div className="h-[55%] relative">
+          <motion.div key="welcome" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-screen flex flex-col overflow-y-auto">
+            <div className="h-[55%] relative shrink-0">
               <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000&auto=format&fit=crop" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-dark-bg to-transparent" />
             </div>
@@ -251,20 +251,20 @@ export default function App() {
         )}
 
         {screen === 'onboarding' && (
-           <motion.div key="onboarding" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} className="h-screen flex flex-col">
-              <img src={ONBOARDING_STEPS[onboardingStep].image} className="h-[50%] object-cover" />
+           <motion.div key="onboarding" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} className="h-screen flex flex-col overflow-y-auto">
+              <img src={ONBOARDING_STEPS[onboardingStep].image} className="h-[50%] object-cover shrink-0" />
               <div className="flex-1 px-8 pt-10 bg-dark-bg flex flex-col">
                  <h2 className="text-3xl font-bold mb-4">{ONBOARDING_STEPS[onboardingStep].title}</h2>
                  <p className="text-gray-400">{ONBOARDING_STEPS[onboardingStep].desc}</p>
-                 <button onClick={() => onboardingStep < 3 ? setOnboardingStep(onboardingStep+1) : navigate('profile')} className="mt-auto mb-12 w-full py-4 bg-primary text-black font-bold rounded-full">Próximo</button>
+                 <button onClick={() => onboardingStep < 3 ? setOnboardingStep(onboardingStep+1) : navigate('profile')} className="mt-auto mb-12 w-full py-4 bg-primary text-black font-bold rounded-full shrink-0">Próximo</button>
               </div>
            </motion.div>
         )}
 
         {screen === 'profile' && (
-           <motion.div key="profile" className="h-screen p-8 pt-20 flex flex-col">
+           <motion.div key="profile" className="h-screen p-8 pt-20 flex flex-col overflow-y-auto">
               <h2 className="text-3xl font-bold mb-8">Para quem vais cuidar hoje?</h2>
-              <div className="space-y-4">
+              <div className="space-y-4 mb-8">
                 {PROFILES.map(p => (
                   <button key={p.id} onClick={() => setSelectedProfile(p.id)} className={`w-full p-6 rounded-3xl border-2 text-left ${selectedProfile === p.id ? 'border-primary bg-primary/5' : 'border-gray-800 bg-card-bg'}`}>
                     <span className="text-4xl block mb-2">{p.emoji}</span>
@@ -273,12 +273,12 @@ export default function App() {
                   </button>
                 ))}
               </div>
-              <button disabled={!selectedProfile} onClick={() => navigate('signup')} className="mt-auto mb-12 w-full py-4 bg-primary text-black font-bold rounded-full disabled:opacity-50">Continuar</button>
+              <button disabled={!selectedProfile} onClick={() => navigate('signup')} className="mt-auto mb-12 w-full py-4 bg-primary text-black font-bold rounded-full disabled:opacity-50 shrink-0">Continuar</button>
            </motion.div>
         )}
 
         {screen === 'signup' && (
-          <motion.div key="signup" className="h-screen p-8 pt-20 flex flex-col">
+          <motion.div key="signup" className="h-screen p-8 pt-20 flex flex-col overflow-y-auto">
             <h1 className="text-3xl font-bold mb-8">Criar Conta</h1>
             <form onSubmit={handleSignUp} className="space-y-4">
               <input type="text" placeholder="Nome" value={fullName} onChange={e => setFullName(e.target.value)} className="w-full p-4 bg-card-bg border border-gray-800 rounded-2xl outline-none" required />
@@ -286,12 +286,12 @@ export default function App() {
               <input type="password" placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} className="w-full p-4 bg-card-bg border border-gray-800 rounded-2xl outline-none" required />
               <button type="submit" className="w-full py-4 bg-primary text-black font-bold rounded-full">Registar</button>
             </form>
-            <p className="mt-8 text-center text-gray-500">Já tens conta? <span onClick={() => navigate('login')} className="text-primary font-bold cursor-pointer">Entrar</span></p>
+            <p className="mt-8 text-center text-gray-500 pb-12">Já tens conta? <span onClick={() => navigate('login')} className="text-primary font-bold cursor-pointer">Entrar</span></p>
           </motion.div>
         )}
 
         {screen === 'login' && (
-          <motion.div key="login" className="h-screen p-8 pt-20 flex flex-col">
+          <motion.div key="login" className="h-screen p-8 pt-20 flex flex-col overflow-y-auto">
             <h1 className="text-3xl font-bold mb-8">Login</h1>
             <form onSubmit={handleLogin} className="space-y-4">
               <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-4 bg-card-bg border border-gray-800 rounded-2xl outline-none" required />
@@ -329,12 +329,12 @@ export default function App() {
         )}
 
         {screen === 'capture' && (
-          <motion.div key="capture" className="h-screen bg-dark-bg p-8 pt-20">
+          <motion.div key="capture" className="h-screen bg-dark-bg p-8 pt-20 overflow-y-auto pb-32">
             <button onClick={() => navigate('dashboard')} className="mb-8"><ArrowLeft size={24} /></button>
             <h1 className="text-3xl font-bold mb-2">Capturar Foto</h1>
             <p className="text-gray-500 mb-8">Tira uma foto do teu prato para analisar.</p>
             <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" className="hidden" />
-            <button onClick={() => fileInputRef.current?.click()} className="w-full aspect-square bg-card-bg rounded-[40px] border-2 border-dashed border-gray-800 flex flex-col items-center justify-center gap-4">
+            <button onClick={() => fileInputRef.current?.click()} className="w-full aspect-square bg-card-bg rounded-[40px] border-2 border-dashed border-gray-800 flex flex-col items-center justify-center gap-4 shrink-0">
               {loading ? <Loader2 className="animate-spin text-primary" size={48} /> : <Camera size={48} className="text-gray-600" />}
               <span className="text-gray-500 font-bold">{loading ? 'Analisando...' : 'Abrir Câmara'}</span>
             </button>
@@ -372,11 +372,15 @@ export default function App() {
         )}
 
         {screen === 'profile_settings' && (
-          <motion.div key="profile_settings" className="h-screen p-8 pt-20 flex flex-col">
+          <motion.div key="profile_settings" className="h-screen p-8 pt-20 flex flex-col overflow-y-auto pb-24">
              <div className="flex flex-col items-center mb-10">
-                <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center text-4xl border-2 border-primary/40 mb-4 overflow-hidden">
+                <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center text-4xl border-2 border-primary/40 mb-4 overflow-hidden relative">
                    {userProfile?.avatar_url ? <img src={userProfile.avatar_url} className="w-full h-full object-cover" /> : '👦'}
+                   {avatarLoading && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}
                 </div>
+                <input type="file" ref={avatarInputRef} onChange={handleAvatarChange} accept="image/*" className="hidden" />
+                <button onClick={() => avatarInputRef.current?.click()} className="text-primary text-xs font-bold mb-6">Mudar Foto</button>
+                
                 <h2 className="text-2xl font-bold">{userProfile?.name || 'Utilizador'}</h2>
                 <p className="text-gray-500 text-sm">{userEmail}</p>
                 <button onClick={() => db.auth.signOut()} className="mt-12 text-red-500 font-bold flex items-center gap-2"><Moon size={18} /> Sair da Conta</button>
@@ -387,7 +391,7 @@ export default function App() {
 
         {screen === 'chat' && (
           <motion.div key="chat" className="h-screen flex flex-col">
-            <div className="p-8 pt-20 flex justify-between items-center"><h1 className="text-3xl font-bold">Kidia Chat</h1><Sparkles className="text-primary" /></div>
+            <div className="p-8 pt-20 flex justify-between items-center shrink-0"><h1 className="text-3xl font-bold">Kidia Chat</h1><Sparkles className="text-primary" /></div>
             <div className="flex-1 overflow-y-auto px-6 space-y-4 pb-32">
               {chatMessages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
