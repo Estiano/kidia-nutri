@@ -46,8 +46,38 @@ export const db = {
       if (supabase) {
         return supabase.from('profiles').insert([profile]);
       }
-      // mockDb handles profile creation in signUp
       return { error: null };
+    },
+    update: async (userId: string, updates: any) => {
+      if (supabase) {
+        return supabase.from('profiles').update(updates).eq('id', userId);
+      }
+      // For mock, we can update the local storage
+      const profileStr = localStorage.getItem('kidia_profile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        const updated = { ...profile, ...updates };
+        localStorage.setItem('kidia_profile', JSON.stringify(updated));
+      }
+      return { error: null };
+    },
+    uploadAvatar: async (userId: string, file: File) => {
+      if (supabase) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${userId}/${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, file);
+
+        if (uploadError) return { data: null, error: uploadError };
+
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+        return { data: publicUrl, error: null };
+      }
+      // Mock: Return a local blob URL
+      return { data: URL.createObjectURL(file), error: null };
     }
   },
 

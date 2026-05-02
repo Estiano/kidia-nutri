@@ -141,6 +141,27 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file || !session) return;
+    setAvatarLoading(true);
+    setErrorMessage('');
+    try {
+      const { data: url, error } = await db.profiles.uploadAvatar(session.user.id, file);
+      if (error) throw error;
+      if (url) {
+        await db.profiles.update(session.user.id, { avatar_url: url });
+        await fetchUserData(session.user.id);
+      }
+    } catch (err: any) {
+      setErrorMessage("Erro ao atualizar foto: " + err.message + ". Certifica-te que o bucket 'avatars' existe no Supabase.");
+    } finally {
+      setAvatarLoading(false);
+    }
+  };
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -216,8 +237,16 @@ export default function App() {
     if (error) {
       setErrorMessage(error.message);
     } else if (data.user) {
-      // Profile is handled inside db.auth.signUp for mock, 
-      // or we can manually insert for real supabase if needed (db handles it)
+      // Garantir que o registro do perfil é criado na tabela 'profiles'
+      await db.profiles.insert({
+        id: data.user.id,
+        email: email,
+        name: fullName,
+        profile_type: selectedProfile || 'self',
+        daily_calorie_target: 2000,
+        is_onboarded: true
+      });
+      
       if (data.session) {
         navigate('dashboard');
       } else {
@@ -1301,10 +1330,30 @@ export default function App() {
 
             <div className="flex flex-col items-center mb-10">
                <div className="relative mb-4">
-                  <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center text-4xl border-2 border-primary/40">
-                     {selectedProfile === 'me' ? '👦' : selectedProfile === 'child' ? '👶' : '👴'}
+                  <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center text-4xl border-2 border-primary/40 overflow-hidden">
+                     {userProfile?.avatar_url ? (
+                        <img src={userProfile.avatar_url} className="w-full h-full object-cover" alt="Profile" />
+                     ) : (
+                        <span>{selectedProfile === 'me' ? '👦' : selectedProfile === 'child' ? '👶' : '👴'}</span>
+                     )}
+                     {avatarLoading && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                           <Loader2 size={24} className="text-primary animate-spin" />
+                        </div>
+                     )}
                   </div>
-                  <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center border-2 border-dark-bg text-black">
+                  <input 
+                    type="file" 
+                    ref={avatarInputRef} 
+                    onChange={handleAvatarChange} 
+                    accept="image/*" 
+                    className="hidden" 
+                  />
+                  <button 
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={avatarLoading}
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center border-2 border-dark-bg text-black active:scale-90 transition-transform"
+                  >
                      <Camera size={14} />
                   </button>
                </div>
